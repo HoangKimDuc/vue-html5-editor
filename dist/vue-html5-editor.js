@@ -1,7 +1,7 @@
 /**
  * Vue-html5-editor 1.1.0
  * https://github.com/PeakTai/vue-html5-editor
- * build at Thu Apr 13 2017 15:51:01 GMT+0800 (CST)
+ * build at Mon Sep 25 2017 11:43:02 GMT+0700 (SE Asia Standard Time)
  */
 
 (function (global, factory) {
@@ -18,12 +18,13 @@ function __$styleInject(css, returnValue) {
   var head = document.head || document.getElementsByTagName('head')[0];
   var style = document.createElement('style');
   style.type = 'text/css';
+  head.appendChild(style);
+  
   if (style.styleSheet){
     style.styleSheet.cssText = css;
   } else {
     style.appendChild(document.createTextNode(css));
   }
-  head.appendChild(style);
   return returnValue;
 }
 
@@ -326,7 +327,7 @@ var dashboard$3 = {
         }
     },
     methods: {
-        reset: function reset(){
+        reset: function reset() {
             this.upload.status = 'ready';
         },
         insertImageUrl: function insertImageUrl() {
@@ -339,7 +340,7 @@ var dashboard$3 = {
         pick: function pick() {
             this.$refs.file.click();
         },
-        setUploadError: function setUploadError(msg){
+        setUploadError: function setUploadError(msg) {
             this.upload.status = 'error';
             this.upload.errorMsg = msg;
         },
@@ -373,7 +374,7 @@ var dashboard$3 = {
             // }
 
             if (!config.upload && typeof config.server === 'string') {
-                config.upload = {url: config.server};
+                config.upload = { url: config.server };
             }
             if (config.upload && !config.upload.url) {
                 config.upload = null;
@@ -428,8 +429,7 @@ var dashboard$3 = {
             this.$parent.execCommand(Command.INSERT_IMAGE, data);
         },
         uploadToServer: function uploadToServer(file) {
-            var this$1 = this;
-
+            console.log('Upload ảnh dùng axios');
             var config = this.$options.module.config;
 
             var formData = new FormData();
@@ -448,53 +448,62 @@ var dashboard$3 = {
                 });
             }
 
-            var xhr = new XMLHttpRequest();
+            var current = this;
+            var data = new FormData();
+            data.append('file', file);
+            data.append('type', 'image');
+            axios.post('/files', data).then(function (res) {
+                current.$parent.execCommand(Command.INSERT_IMAGE, res.data.data);
+            }).catch(function (err) {
 
-            xhr.onprogress = function (e) {
-                this$1.upload.status = 'progress';
-                if (e.lengthComputable) {
-                    this$1.upload.progressComputable = true;
-                    var percentComplete = e.loaded / e.total;
-                    this$1.upload.complete = (percentComplete * 100).toFixed(2);
-                } else {
-                    this$1.upload.progressComputable = false;
-                }
-            };
+            });
+            // const xhr = new XMLHttpRequest()
 
-            xhr.onload = function () {
-                if (xhr.status !== 200) {
-                    this$1.setUploadError(("request error,code " + (xhr.status)));
-                    return
-                }
+            // xhr.onprogress = (e) => {
+            //     this.upload.status = 'progress'
+            //     if (e.lengthComputable) {
+            //         this.upload.progressComputable = true
+            //         const percentComplete = e.loaded / e.total
+            //         this.upload.complete = (percentComplete * 100).toFixed(2)
+            //     } else {
+            //         this.upload.progressComputable = false
+            //     }
+            // }
 
-                try {
-                    var url = config.uploadHandler(xhr.responseText);
-                    if (url) {
-                        this$1.$parent.execCommand(Command.INSERT_IMAGE, url);
-                    }
-                } catch (err) {
-                    this$1.setUploadError(err.toString());
-                } finally {
-                    this$1.upload.status = 'ready';
-                }
-            };
+            // xhr.onload = () => {
+            //     if (xhr.status >= 300) {
+            //         this.setUploadError(`request error,code ${xhr.status}`)
+            //         return
+            //     }
 
-            xhr.onerror = function () {
-                // find network info in brower tools
-                this$1.setUploadError('request error');
-            };
+            //     try {
+            //         const url = config.uploadHandler(xhr.responseText)
+            //         if (url) {
+            //             this.$parent.execCommand(Command.INSERT_IMAGE, url)
+            //         }
+            //     } catch (err) {
+            //         this.setUploadError(err.toString())
+            //     } finally {
+            //         this.upload.status = 'ready'
+            //     }
+            // }
 
-            xhr.onabort = function () {
-                this$1.upload.status = 'abort';
-            };
+            // xhr.onerror = () => {
+            //     // find network info in brower tools
+            //     this.setUploadError('request error')
+            // }
 
-            xhr.open('POST', config.upload.url);
-            if (typeof config.upload.headers === 'object') {
-                Object.keys(config.upload.headers).forEach(function (k) {
-                    xhr.setRequestHeader(k, config.upload.headers[k]);
-                });
-            }
-            xhr.send(formData);
+            // xhr.onabort = () => {
+            //     this.upload.status = 'abort'
+            // }
+
+            // xhr.open('POST', config.upload.url)
+            // if (typeof config.upload.headers === 'object') {
+            //     Object.keys(config.upload.headers).forEach((k) => {
+            //         xhr.setRequestHeader(k, config.upload.headers[k])
+            //     })
+            // }
+            // xhr.send(formData)
         }
     }
 };
@@ -1169,7 +1178,7 @@ RangeHandler.prototype.execCommand = function execCommand (command, arg) {
     }
 };
 
-__$styleInject(".vue-html5-editor,.vue-html5-editor *{box-sizing:border-box}.vue-html5-editor{font-size:14px;line-height:1.5;background-color:#fff;color:#333;border:1px solid #ddd;text-align:left;border-radius:5px;overflow:hidden}.vue-html5-editor.full-screen{position:fixed!important;top:0!important;left:0!important;bottom:0!important;right:0!important;border-radius:0}.vue-html5-editor>.toolbar{position:relative;background-color:inherit}.vue-html5-editor>.toolbar>ul{list-style:none;padding:0;margin:0;border-bottom:1px solid #ddd}.vue-html5-editor>.toolbar>ul>li{display:inline-block;cursor:pointer;text-align:center;line-height:36px;padding:0 10px}.vue-html5-editor>.toolbar>ul>li .icon{height:16px;width:16px;display:inline-block;vertical-align:middle}.vue-html5-editor>.toolbar>.dashboard{background-color:inherit;border-bottom:1px solid #ddd;padding:10px;position:absolute;top:100%;left:0;right:0;overflow:auto}.vue-html5-editor>.toolbar>.dashboard input[type=text],.vue-html5-editor>.toolbar>.dashboard input[type=number],.vue-html5-editor>.toolbar>.dashboard select{padding:6px 12px;color:inherit;background-color:transparent;border:1px solid #ddd;border-radius:5px}.vue-html5-editor>.toolbar>.dashboard input[type=text]:hover,.vue-html5-editor>.toolbar>.dashboard input[type=number]:hover,.vue-html5-editor>.toolbar>.dashboard select:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=text][readonly],.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=number][readonly],.vue-html5-editor>.toolbar>.dashboard select[disabled],.vue-html5-editor>.toolbar>.dashboard select[readonly]{background-color:#eee;opacity:1}.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard select[disabled]{cursor:not-allowed}.vue-html5-editor>.toolbar>.dashboard button{color:inherit;background-color:inherit;padding:6px 12px;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid #ddd;border-radius:5px;margin-right:4px;margin-bottom:4px}.vue-html5-editor>.toolbar>.dashboard button:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard button[disabled]{cursor:not-allowed;opacity:.68}.vue-html5-editor>.toolbar>.dashboard button:last-child{margin-right:0}.vue-html5-editor>.toolbar>.dashboard label{font-weight:bolder}.vue-html5-editor>.content{overflow:auto;padding:10px}.vue-html5-editor>.content:focus{outline:0}",undefined);
+__$styleInject(".vue-html5-editor{font-size:14px;line-height:1.5;background-color:#fff;color:#333;border:1px solid #ddd;text-align:left;border-radius:5px;overflow:hidden;box-sizing:border-box}.vue-html5-editor *{box-sizing:border-box}.vue-html5-editor.full-screen{position:fixed!important;top:0!important;left:0!important;bottom:0!important;right:0!important;border-radius:0}.vue-html5-editor>.toolbar{position:relative;background-color:inherit}.vue-html5-editor>.toolbar>ul{list-style:none;padding:0;margin:0;border-bottom:1px solid #ddd}.vue-html5-editor>.toolbar>ul>li{display:inline-block;cursor:pointer;text-align:center;line-height:36px;padding:0 10px}.vue-html5-editor>.toolbar>ul>li .icon{height:16px;width:16px;display:inline-block;vertical-align:middle}.vue-html5-editor>.toolbar>.dashboard{background-color:inherit;border-bottom:1px solid #ddd;padding:10px;position:absolute;top:100%;left:0;right:0;overflow:auto}.vue-html5-editor>.toolbar>.dashboard input[type=number],.vue-html5-editor>.toolbar>.dashboard select{padding:6px 12px;color:inherit;background-color:transparent;border:1px solid #ddd;border-radius:5px}.vue-html5-editor>.toolbar>.dashboard input[type=number]:hover,.vue-html5-editor>.toolbar>.dashboard input[type=text]:hover,.vue-html5-editor>.toolbar>.dashboard select:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=number][readonly],.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=text][readonly],.vue-html5-editor>.toolbar>.dashboard select[disabled],.vue-html5-editor>.toolbar>.dashboard select[readonly]{background-color:#eee;opacity:1}.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard select[disabled]{cursor:not-allowed}.vue-html5-editor>.toolbar>.dashboard button{color:inherit;background-color:inherit;padding:6px 12px;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid #ddd;border-radius:5px;margin-right:4px;margin-bottom:4px}.vue-html5-editor>.toolbar>.dashboard button:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard button[disabled]{cursor:not-allowed;opacity:.68}.vue-html5-editor>.toolbar>.dashboard button:last-child{margin-right:0}.vue-html5-editor>.toolbar>.dashboard label{font-weight:bolder}.vue-html5-editor>.content{overflow:auto;padding:10px}.vue-html5-editor>.content:focus{outline:0}@media (max-width:767px){.vue-html5-editor{margin-bottom:5px;width:100%!important}button:last-child,input[type=number]:last-child,input[type=text]:last-child,label:last-child,select:last-child{margin-bottom:0}}button:last-child,input:last-child,label:last-child,select:last-child{margin-right:0}",undefined);
 
 var template$9 = "<div class=\"vue-html5-editor\" :class=\"{'full-screen':fullScreen}\" :style=\"{'z-index':zIndex}\"> <div class=\"toolbar\" :style=\"{'z-index':zIndex+1}\" ref=\"toolbar\"> <ul> <template v-for=\"module in modules\"> <li :title=\"locale[module.i18n]\" @click=\"activeModule(module)\"> <span class=\"icon\" :class=\"module.icon\"></span> <template v-if=\"showModuleName === undefined ? defaultShowModuleName : showModuleName\"> &nbsp;{{locale[module.i18n]}} </template> </li> </template> </ul> <div class=\"dashboard\" v-show=\"dashboard\" ref=\"dashboard\"> <keep-alive> <div v-show=\"dashboard\" :is=\"dashboard\"></div> </keep-alive> </div> </div> <div class=\"content\" ref=\"content\" :style=\"contentStyle\" contenteditable @click=\"toggleDashboard(dashboard)\"> </div> </div>";
 

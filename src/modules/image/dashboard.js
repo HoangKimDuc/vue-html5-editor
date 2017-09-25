@@ -1,7 +1,6 @@
 import lrz from 'lrz'
 import template from './dashboard.html'
 import Command from '../../range/command'
-
 /**
  * Created by peak on 2017/2/10.
  */
@@ -19,7 +18,7 @@ export default {
         }
     },
     methods: {
-        reset(){
+        reset() {
             this.upload.status = 'ready'
         },
         insertImageUrl() {
@@ -32,7 +31,7 @@ export default {
         pick() {
             this.$refs.file.click()
         },
-        setUploadError(msg){
+        setUploadError(msg) {
             this.upload.status = 'error'
             this.upload.errorMsg = msg
         },
@@ -64,7 +63,7 @@ export default {
             // }
 
             if (!config.upload && typeof config.server === 'string') {
-                config.upload = {url: config.server}
+                config.upload = { url: config.server }
             }
             if (config.upload && !config.upload.url) {
                 config.upload = null
@@ -119,6 +118,7 @@ export default {
             this.$parent.execCommand(Command.INSERT_IMAGE, data)
         },
         uploadToServer(file) {
+            console.log('Upload ảnh dùng axios')
             const config = this.$options.module.config
 
             const formData = new FormData()
@@ -137,53 +137,62 @@ export default {
                 })
             }
 
-            const xhr = new XMLHttpRequest()
+            let current = this
+            let data = new FormData()
+            data.append('file', file)
+            data.append('type', 'image')
+            axios.post('/files', data).then(function (res) {
+                current.$parent.execCommand(Command.INSERT_IMAGE, res.data.data)
+            }).catch(function (err) {
 
-            xhr.onprogress = (e) => {
-                this.upload.status = 'progress'
-                if (e.lengthComputable) {
-                    this.upload.progressComputable = true
-                    const percentComplete = e.loaded / e.total
-                    this.upload.complete = (percentComplete * 100).toFixed(2)
-                } else {
-                    this.upload.progressComputable = false
-                }
-            }
+            })
+            // const xhr = new XMLHttpRequest()
 
-            xhr.onload = () => {
-                if (xhr.status >= 300) {
-                    this.setUploadError(`request error,code ${xhr.status}`)
-                    return
-                }
+            // xhr.onprogress = (e) => {
+            //     this.upload.status = 'progress'
+            //     if (e.lengthComputable) {
+            //         this.upload.progressComputable = true
+            //         const percentComplete = e.loaded / e.total
+            //         this.upload.complete = (percentComplete * 100).toFixed(2)
+            //     } else {
+            //         this.upload.progressComputable = false
+            //     }
+            // }
 
-                try {
-                    const url = config.uploadHandler(xhr.responseText)
-                    if (url) {
-                        this.$parent.execCommand(Command.INSERT_IMAGE, url)
-                    }
-                } catch (err) {
-                    this.setUploadError(err.toString())
-                } finally {
-                    this.upload.status = 'ready'
-                }
-            }
+            // xhr.onload = () => {
+            //     if (xhr.status >= 300) {
+            //         this.setUploadError(`request error,code ${xhr.status}`)
+            //         return
+            //     }
 
-            xhr.onerror = () => {
-                // find network info in brower tools
-                this.setUploadError('request error')
-            }
+            //     try {
+            //         const url = config.uploadHandler(xhr.responseText)
+            //         if (url) {
+            //             this.$parent.execCommand(Command.INSERT_IMAGE, url)
+            //         }
+            //     } catch (err) {
+            //         this.setUploadError(err.toString())
+            //     } finally {
+            //         this.upload.status = 'ready'
+            //     }
+            // }
 
-            xhr.onabort = () => {
-                this.upload.status = 'abort'
-            }
+            // xhr.onerror = () => {
+            //     // find network info in brower tools
+            //     this.setUploadError('request error')
+            // }
 
-            xhr.open('POST', config.upload.url)
-            if (typeof config.upload.headers === 'object') {
-                Object.keys(config.upload.headers).forEach((k) => {
-                    xhr.setRequestHeader(k, config.upload.headers[k])
-                })
-            }
-            xhr.send(formData)
+            // xhr.onabort = () => {
+            //     this.upload.status = 'abort'
+            // }
+
+            // xhr.open('POST', config.upload.url)
+            // if (typeof config.upload.headers === 'object') {
+            //     Object.keys(config.upload.headers).forEach((k) => {
+            //         xhr.setRequestHeader(k, config.upload.headers[k])
+            //     })
+            // }
+            // xhr.send(formData)
         }
     }
 }
