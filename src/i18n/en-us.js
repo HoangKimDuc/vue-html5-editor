@@ -1,6 +1,8 @@
 export default {
+    insert: 'Insert',
     align: 'align',
     image: 'image',
+    video: 'video',
     list: 'list',
     link: 'link',
     unlink: 'unlink',

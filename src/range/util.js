@@ -115,7 +115,7 @@ export const getAfterStartDescendantTextNodes = (ancestor, startEl) => {
  */
 export const getParentBlockNode = (node) => {
     const blockNodeNames = ['DIV', 'P', 'SECTION', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-        'OL', 'UL', 'LI', 'TR', 'TD', 'TH', 'TBODY', 'THEAD', 'TABLE', 'ARTICLE', 'HEADER', 'FOOTER']
+        'OL', 'UL', 'LI', 'TR', 'TD', 'TH', 'TBODY', 'THEAD', 'TABLE', 'ARTICLE', 'HEADER', 'FOOTER','IFRAME']
     let container = node
     while (container) {
         if (blockNodeNames.includes(container.nodeName)) {

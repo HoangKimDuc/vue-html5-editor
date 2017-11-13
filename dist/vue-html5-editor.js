@@ -1,7 +1,7 @@
 /**
  * Vue-html5-editor 1.1.0
  * https://github.com/PeakTai/vue-html5-editor
- * build at Mon Sep 25 2017 11:43:02 GMT+0700 (SE Asia Standard Time)
+ * build at Mon Nov 13 2017 16:03:55 GMT+0700 (SE Asia Standard Time)
  */
 
 (function (global, factory) {
@@ -175,6 +175,7 @@ var Command = {
     LINE_HEIGHT: 'lineHeight',
     INSERT_HORIZONTAL_RULE: 'insertHorizontalRule',
     INSERT_IMAGE: 'insertImage',
+    INSERT_VIDEO: 'insertHTML',
     CREATE_LINK: 'createLink',
     INSERT_ORDERED_LIST: 'insertOrderedList',
     INSERT_UNORDERED_LIST: 'insertUnorderedList',
@@ -543,13 +544,69 @@ var image = {
     dashboard: dashboard$3
 };
 
-var template$4 = "<div> <h3 style=\"text-align: center\">Vue-html5-editor&nbsp;{{version}}</h3> <p style=\"text-align: center\"> repository: <a href=\"https://github.com/PeakTai/vue-html5-editor\" target=\"_blank\"> https://github.com/PeakTai/vue-html5-editor </a> </p> </div> ";
+var template$4 = "<div> <div v-show=\"upload.status=='ready'\"> <input type=\"text\" v-model=\"videoUrl\" maxlength=\"255\" :placeholder=\"$parent.locale['please enter a url']\"> <button type=\"button\" @click=\"insertVideoUrl\">{{$parent.locale.insert}}</button> <!-- <input type=\"file\" ref=\"file\" style=\"display: none !important;\" @change=\"process\"\r\n               accept=\"image/png,image/jpeg,image/gif,image/jpg\">\r\n        <button type=\"button\" @click=\"pick\">{{$parent.locale.upload}}</button> --> </div> <!-- \r\n    <div v-if=\"upload.status=='progress'\">\r\n        {{$parent.locale.progress}}:{{upload.progressComputable ? $parent.locale.unknown : upload.complete}}\r\n    </div>\r\n\r\n    <div v-if=\"upload.status=='success'\">\r\n        {{$parent.locale[\"please wait\"]}}...\r\n    </div>\r\n\r\n    <div v-if=\"upload.status=='error'\">\r\n        {{$parent.locale.error}}:{{upload.errorMsg}}\r\n        <button type=\"button\" @click=\"reset\">{{$parent.locale.reset}}</button>\r\n    </div>\r\n\r\n    <div v-if=\"upload.status=='abort'\">\r\n        {{$parent.locale.upload}}&nbsp;{{$parent.locale.abort}},\r\n        <button type=\"button\" @click=\"reset\">{{$parent.locale.reset}}</button>\r\n    </div> --> </div> ";
 
 /**
  * Created by peak on 2017/2/10.
  */
 var dashboard$4 = {
     template: template$4,
+    data: function data() {
+        return {
+            videoUrl: '',
+            upload: {
+                status: 'ready', // progress,success,error,abort
+                errorMsg: null,
+                progressComputable: false,
+                complete: 0
+            }
+        }
+    },
+    methods: {
+        reset: function reset() {
+            this.upload.status = 'ready';
+        },
+        insertVideoUrl: function insertVideoUrl() {
+            if (!this.videoUrl) {
+                return
+            }
+            // format iframe video Youtube
+            //url https://www.youtube.com/watch?v=zZjGBB5X3Z4
+            //iframe <iframe width="560" height="315" src="https://www.youtube.com/embed/zZjGBB5X3Z4" frameborder="0" allowfullscreen></iframe>
+            var idvideo = (this.videoUrl.split("v="))[1];
+            var html = "<iframe width=\"560\" height=\"315\" style=\"margin:0 auto;display:block;\" src=\"https://www.youtube.com/embed/" + idvideo + "\" frameborder=\"0\" allowfullscreen></iframe>";
+            this.$parent.execCommand(Command.INSERT_VIDEO, html);
+            this.videoUrl = null;
+        },
+       
+        setUploadError: function setUploadError(msg) {
+            this.upload.status = 'error';
+            this.upload.errorMsg = msg;
+        },
+    }
+};
+
+/**
+ * insert image
+ * Created by peak on 16/8/18.
+ */
+var video = {
+    name: 'video',
+    icon: 'fa fa-youtube',
+    i18n: 'video',
+    config: {
+       
+    },
+    dashboard: dashboard$4
+};
+
+var template$5 = "<div> <h3 style=\"text-align: center\">Vue-html5-editor&nbsp;{{version}}</h3> <p style=\"text-align: center\"> repository: <a href=\"https://github.com/PeakTai/vue-html5-editor\" target=\"_blank\"> https://github.com/PeakTai/vue-html5-editor </a> </p> </div> ";
+
+/**
+ * Created by peak on 2017/2/10.
+ */
+var dashboard$5 = {
+    template: template$5,
     data: function data(){
         return {
             version: "1.1.0"
@@ -574,13 +631,13 @@ var info = {
     // destroyed(editor){
     //
     // },
-    dashboard: dashboard$4
+    dashboard: dashboard$5
 };
 
-var template$5 = "<form @submit.prevent=\"createLink\"> <input type=\"text\" :placeholder=\"$parent.locale['please enter a url']\" v-model=\"url\" maxlength=\"1024\"> <button type=\"submit\">{{$parent.locale[\"create link\"]}}</button> </form>";
+var template$6 = "<form @submit.prevent=\"createLink\"> <input type=\"text\" :placeholder=\"$parent.locale['please enter a url']\" v-model=\"url\" maxlength=\"1024\"> <button type=\"submit\">{{$parent.locale[\"create link\"]}}</button> </form>";
 
-var dashboard$5 = {
-    template: template$5,
+var dashboard$6 = {
+    template: template$6,
     data: function data(){
         return {url: null}
     },
@@ -603,16 +660,16 @@ var link = {
     name: 'link',
     icon: 'fa fa-chain',
     i18n: 'link',
-    dashboard: dashboard$5
+    dashboard: dashboard$6
 };
 
-var template$6 = "<div> <button type=\"button\" @click=\"$parent.execCommand('insertOrderedList')\"> {{$parent.locale[\"ordered list\"]}} </button> <button type=\"button\" @click=\"$parent.execCommand('insertUnorderedList')\"> {{$parent.locale[\"unordered list\"]}} </button> </div>";
+var template$7 = "<div> <button type=\"button\" @click=\"$parent.execCommand('insertOrderedList')\"> {{$parent.locale[\"ordered list\"]}} </button> <button type=\"button\" @click=\"$parent.execCommand('insertUnorderedList')\"> {{$parent.locale[\"unordered list\"]}} </button> </div>";
 
 /**
  * Created by peak on 2017/2/10.
  */
-var dashboard$6 = {
-    template: template$6
+var dashboard$7 = {
+    template: template$7
 };
 
 /**
@@ -623,16 +680,16 @@ var list = {
     name: 'list',
     icon: 'fa fa-list',
     i18n: 'list',
-    dashboard: dashboard$6
+    dashboard: dashboard$7
 };
 
-var template$7 = "<form @submit.prevent=\"insertTable\"> <label> {{$parent.locale[\"row count\"]}} <input type=\"number\" style=\"width: 60px\" maxlength=\"2\" min=\"2\" max=\"10\" v-model=\"rows\"> </label> <label> {{$parent.locale[\"column count\"]}} <input type=\"number\" style=\"width: 60px\" maxlength=\"2\" min=\"2\" max=\"10\" v-model=\"cols\"> </label> <button type=\"submit\">{{$parent.locale.save}}</button> </form>";
+var template$8 = "<form @submit.prevent=\"insertTable\"> <label> {{$parent.locale[\"row count\"]}} <input type=\"number\" style=\"width: 60px\" maxlength=\"2\" min=\"2\" max=\"10\" v-model=\"rows\"> </label> <label> {{$parent.locale[\"column count\"]}} <input type=\"number\" style=\"width: 60px\" maxlength=\"2\" min=\"2\" max=\"10\" v-model=\"cols\"> </label> <button type=\"submit\">{{$parent.locale.save}}</button> </form>";
 
 /**
  * Created by peak on 2017/2/10.
  */
-var dashboard$7 = {
-    template: template$7,
+var dashboard$8 = {
+    template: template$8,
     data: function data(){
         return {
             rows: 2,
@@ -675,13 +732,13 @@ var table = {
     name: 'tabulation',
     icon: 'fa fa-table',
     i18n: 'table',
-    dashboard: dashboard$7
+    dashboard: dashboard$8
 };
 
-var template$8 = "<div> <button type=\"button\" @click=\"$parent.execCommand('bold')\">{{$parent.locale[\"bold\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('italic')\">{{$parent.locale[\"italic\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('underline')\">{{$parent.locale[\"underline\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('strikeThrough')\">{{$parent.locale[\"strike through\"]}} </button> <button type=\"button\" @click=\"$parent.execCommand('subscript')\">{{$parent.locale[\"subscript\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('superscript')\">{{$parent.locale[\"superscript\"]}}</button> </div> ";
+var template$9 = "<div> <button type=\"button\" @click=\"$parent.execCommand('bold')\">{{$parent.locale[\"bold\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('italic')\">{{$parent.locale[\"italic\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('underline')\">{{$parent.locale[\"underline\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('strikeThrough')\">{{$parent.locale[\"strike through\"]}} </button> <button type=\"button\" @click=\"$parent.execCommand('subscript')\">{{$parent.locale[\"subscript\"]}}</button> <button type=\"button\" @click=\"$parent.execCommand('superscript')\">{{$parent.locale[\"superscript\"]}}</button> </div> ";
 
-var dashboard$8 = {
-    template: template$8
+var dashboard$9 = {
+    template: template$9
 };
 
 /**
@@ -692,7 +749,7 @@ var text = {
     name: 'text',
     icon: 'fa fa-pencil',
     i18n: 'text',
-    dashboard: dashboard$8
+    dashboard: dashboard$9
 };
 
 /**
@@ -735,6 +792,7 @@ var buildInModules = [
     unlink,
     table,
     image,
+    video,
     hr,
     eraser,
     undo,
@@ -859,7 +917,7 @@ var getAfterStartDescendantTextNodes = function (ancestor, startEl) {
  */
 var getParentBlockNode = function (node) {
     var blockNodeNames = ['DIV', 'P', 'SECTION', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-        'OL', 'UL', 'LI', 'TR', 'TD', 'TH', 'TBODY', 'THEAD', 'TABLE', 'ARTICLE', 'HEADER', 'FOOTER'];
+        'OL', 'UL', 'LI', 'TR', 'TD', 'TH', 'TBODY', 'THEAD', 'TABLE', 'ARTICLE', 'HEADER', 'FOOTER','IFRAME'];
     var container = node;
     while (container) {
         if (blockNodeNames.includes(container.nodeName)) {
@@ -1110,6 +1168,10 @@ RangeHandler.prototype.execCommand = function execCommand (command, arg) {
             document.execCommand(Command.INSERT_IMAGE, false, arg);
             break
         }
+        case Command.INSERT_VIDEO: {
+            document.execCommand(Command.INSERT_VIDEO, false, arg);
+            break
+        }
         case Command.CREATE_LINK: {
             document.execCommand(Command.CREATE_LINK, false, arg);
             break
@@ -1180,13 +1242,13 @@ RangeHandler.prototype.execCommand = function execCommand (command, arg) {
 
 __$styleInject(".vue-html5-editor{font-size:14px;line-height:1.5;background-color:#fff;color:#333;border:1px solid #ddd;text-align:left;border-radius:5px;overflow:hidden;box-sizing:border-box}.vue-html5-editor *{box-sizing:border-box}.vue-html5-editor.full-screen{position:fixed!important;top:0!important;left:0!important;bottom:0!important;right:0!important;border-radius:0}.vue-html5-editor>.toolbar{position:relative;background-color:inherit}.vue-html5-editor>.toolbar>ul{list-style:none;padding:0;margin:0;border-bottom:1px solid #ddd}.vue-html5-editor>.toolbar>ul>li{display:inline-block;cursor:pointer;text-align:center;line-height:36px;padding:0 10px}.vue-html5-editor>.toolbar>ul>li .icon{height:16px;width:16px;display:inline-block;vertical-align:middle}.vue-html5-editor>.toolbar>.dashboard{background-color:inherit;border-bottom:1px solid #ddd;padding:10px;position:absolute;top:100%;left:0;right:0;overflow:auto}.vue-html5-editor>.toolbar>.dashboard input[type=number],.vue-html5-editor>.toolbar>.dashboard select{padding:6px 12px;color:inherit;background-color:transparent;border:1px solid #ddd;border-radius:5px}.vue-html5-editor>.toolbar>.dashboard input[type=number]:hover,.vue-html5-editor>.toolbar>.dashboard input[type=text]:hover,.vue-html5-editor>.toolbar>.dashboard select:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=number][readonly],.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=text][readonly],.vue-html5-editor>.toolbar>.dashboard select[disabled],.vue-html5-editor>.toolbar>.dashboard select[readonly]{background-color:#eee;opacity:1}.vue-html5-editor>.toolbar>.dashboard input[type=number][disabled],.vue-html5-editor>.toolbar>.dashboard input[type=text][disabled],.vue-html5-editor>.toolbar>.dashboard select[disabled]{cursor:not-allowed}.vue-html5-editor>.toolbar>.dashboard button{color:inherit;background-color:inherit;padding:6px 12px;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid #ddd;border-radius:5px;margin-right:4px;margin-bottom:4px}.vue-html5-editor>.toolbar>.dashboard button:hover{border-color:#bebebe}.vue-html5-editor>.toolbar>.dashboard button[disabled]{cursor:not-allowed;opacity:.68}.vue-html5-editor>.toolbar>.dashboard button:last-child{margin-right:0}.vue-html5-editor>.toolbar>.dashboard label{font-weight:bolder}.vue-html5-editor>.content{overflow:auto;padding:10px}.vue-html5-editor>.content:focus{outline:0}@media (max-width:767px){.vue-html5-editor{margin-bottom:5px;width:100%!important}button:last-child,input[type=number]:last-child,input[type=text]:last-child,label:last-child,select:last-child{margin-bottom:0}}button:last-child,input:last-child,label:last-child,select:last-child{margin-right:0}",undefined);
 
-var template$9 = "<div class=\"vue-html5-editor\" :class=\"{'full-screen':fullScreen}\" :style=\"{'z-index':zIndex}\"> <div class=\"toolbar\" :style=\"{'z-index':zIndex+1}\" ref=\"toolbar\"> <ul> <template v-for=\"module in modules\"> <li :title=\"locale[module.i18n]\" @click=\"activeModule(module)\"> <span class=\"icon\" :class=\"module.icon\"></span> <template v-if=\"showModuleName === undefined ? defaultShowModuleName : showModuleName\"> &nbsp;{{locale[module.i18n]}} </template> </li> </template> </ul> <div class=\"dashboard\" v-show=\"dashboard\" ref=\"dashboard\"> <keep-alive> <div v-show=\"dashboard\" :is=\"dashboard\"></div> </keep-alive> </div> </div> <div class=\"content\" ref=\"content\" :style=\"contentStyle\" contenteditable @click=\"toggleDashboard(dashboard)\"> </div> </div>";
+var template$10 = "<div class=\"vue-html5-editor\" :class=\"{'full-screen':fullScreen}\" :style=\"{'z-index':zIndex}\"> <div class=\"toolbar\" :style=\"{'z-index':zIndex+1}\" ref=\"toolbar\"> <ul> <template v-for=\"module in modules\"> <li :title=\"locale[module.i18n]\" @click=\"activeModule(module)\"> <span class=\"icon\" :class=\"module.icon\"></span> <template v-if=\"showModuleName === undefined ? defaultShowModuleName : showModuleName\"> &nbsp;{{locale[module.i18n]}} </template> </li> </template> </ul> <div class=\"dashboard\" v-show=\"dashboard\" ref=\"dashboard\"> <keep-alive> <div v-show=\"dashboard\" :is=\"dashboard\"></div> </keep-alive> </div> </div> <div class=\"content\" ref=\"content\" :style=\"contentStyle\" contenteditable @click=\"toggleDashboard(dashboard)\"> </div> </div>";
 
 /**
  * Created by peak on 2017/2/9.
  */
 var editor = {
-    template: template$9,
+    template: template$10,
     props: {
         content: {
             type: String,
@@ -1428,8 +1490,10 @@ var i18nZhCn = {
 };
 
 var i18nEnUs = {
+    insert: 'Insert',
     align: 'align',
     image: 'image',
+    video: 'video',
     list: 'list',
     link: 'link',
     unlink: 'unlink',
